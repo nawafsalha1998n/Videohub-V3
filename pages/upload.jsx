@@ -36,7 +36,7 @@ export default function UploadPage() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'your_cloudinary_upload_preset'); // Change this to your Cloudinary upload preset
+    formData.append('upload_preset', 'unsigned_preset'); // Change this to your Cloudinary upload preset
     formData.append('resource_type', 'video');
     
     // Custom logic to handle upload to Cloudinary and insert to Supabase
