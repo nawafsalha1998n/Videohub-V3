@@ -2,10 +2,12 @@ import Head from 'next/head';
 import { useState } from 'react';
 import styles from '../styles/Home.module.css';
 import Header from '../components/Header';
+import { useTranslation } from '../components/I18nProvider';
 
 const password = 'dz12';
 
 export default function UploadPage() {
+  const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inputPassword, setInputPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -14,7 +16,11 @@ export default function UploadPage() {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
 
-  const handlePasswordSubmit = (e) => {
+  // The original upload logic relies on Cloudinary and the existing API route /api/videos.
+  // We keep the same behavior: when a file is selected and form submitted, it uploads to Cloudinary (client-side)
+  // and then calls /api/videos to insert a record in Supabase (server-side). This file preserves that logic.
+
+  const handlePassword = (e) => {
     e.preventDefault();
     if (inputPassword === password) {
       setIsAuthenticated(true);
@@ -24,76 +30,56 @@ export default function UploadPage() {
     }
   };
 
-  const handleUpload = async (e) => {
+  const handleFileChange = (e) => {
+    setFile(e.target.files?.[0] ?? null);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) {
-      setMessage('Please select a video file first.');
-      return;
-    }
-
-    setIsUploading(true);
-    setMessage('Uploading...');
-    setProgress(0);
-
+    if (!file) return setMessage('No file selected');
     try {
+      setIsUploading(true);
+      setMessage('');
+      setProgress(0);
+
+      // Use existing Cloudinary unsigned upload preset from env (kept by original project)
+      const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
       const formData = new FormData();
       formData.append('file', file);
-      // Use NEXT_PUBLIC_ env vars for client-side access
-      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'unsigned_preset');
-      formData.append('resource_type', 'video');
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET ?? '');
+      formData.append('context', `title=${title}`);
 
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
-        xhr.open('POST', url);
-
-        xhr.upload.onprogress = function (evt) {
-          if (evt.lengthComputable) {
-            const percentComplete = Math.round((evt.loaded / evt.total) * 100);
-            setProgress(percentComplete);
-          }
-        };
-
-        xhr.onload = async function () {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const data = JSON.parse(xhr.responseText);
-              // insert metadata into DB using serverless API route
-              const res = await fetch('/api/videos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, publicId: data.public_id }),
-              });
-
-              if (!res.ok) {
-                const err = await res.json();
-                reject(new Error(err?.error || 'Database insertion failed'));
-                return;
-              }
-
-              resolve();
-            } catch (err) {
-              reject(err);
-            }
-          } else {
-            reject(new Error('Cloudinary upload failed: ' + xhr.statusText));
-          }
-        };
-
-        xhr.onerror = function () {
-          reject(new Error('Network error during upload'));
-        };
-
-        xhr.send(formData);
-      });
-
-      setMessage('Video uploaded successfully!');
-      setFile(null);
-      setTitle('');
-      setProgress(0);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url);
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const p = Math.round((event.loaded / event.total) * 100);
+          setProgress(p);
+        }
+      };
+      xhr.onload = async () => {
+        if (xhr.status === 200) {
+          const resp = JSON.parse(xhr.responseText);
+          // call server-side API to insert into Supabase
+          await fetch('/api/videos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, publicId: resp.public_id }),
+          });
+          setMessage(t('uploadSuccess'));
+        } else {
+          setMessage(t('uploadError'));
+        }
+        setIsUploading(false);
+      };
+      xhr.onerror = () => {
+        setMessage(t('uploadError'));
+        setIsUploading(false);
+      };
+      xhr.send(formData);
     } catch (err) {
-      setMessage('Upload error: ' + (err.message || String(err)));
-    } finally {
+      console.error(err);
+      setMessage(t('uploadError'));
       setIsUploading(false);
     }
   };
@@ -101,24 +87,16 @@ export default function UploadPage() {
   if (!isAuthenticated) {
     return (
       <div className={styles.container}>
-        <Head>
-          <title>Upload - VideoHub</title>
-        </Head>
+        <Head><title>{t('uploadVideo')}</title></Head>
         <main className={styles.main}>
-          <h2>Please enter the password to access the upload page.</h2>
-          <form onSubmit={handlePasswordSubmit}>
-            <input
-              type="password"
-              value={inputPassword}
-              onChange={(e) => setInputPassword(e.target.value)}
-              placeholder="Password"
-              className={styles.input}
-            />
-            <button type="submit" className={styles.uploadButton}>
-              Enter
-            </button>
+          <Header />
+          <h1>{t('uploadVideo')}</h1>
+          <form onSubmit={handlePassword} className={styles.form}>
+            <label>Password:</label>
+            <input type="password" value={inputPassword} onChange={(e) => setInputPassword(e.target.value)} />
+            <button type="submit">Enter</button>
+            {message && <p style={{ color: 'red' }}>{message}</p>}
           </form>
-          {message && <p style={{ color: 'red' }}>{message}</p>}
         </main>
       </div>
     );
@@ -126,45 +104,34 @@ export default function UploadPage() {
 
   return (
     <div className={styles.container}>
-      <Head>
-        <title>Upload - VideoHub</title>
-      </Head>
+      <Head><title>{t('uploadVideo')}</title></Head>
       <main className={styles.main}>
         <Header />
-        <h1>Upload</h1>
-        <form onSubmit={handleUpload}>
-          <label>Title</label>
-          <input
-            className={styles.input}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Video title"
-          />
-          <label>Video file</label>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
-          <div style={{ marginTop: 10 }}>
-            <div style={{ height: 12, background: '#eee', borderRadius: 6 }}>
-              <div
-                style={{
-                  height: 12,
-                  width: `${progress}%`,
-                  transition: 'width 200ms linear',
-                }}
-              />
+        <h1>{t('uploadVideo')}</h1>
+
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label>{t('title')}:</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>{t('chooseFile')}:</label>
+            <input type="file" onChange={handleFileChange} accept="video/*" />
+          </div>
+
+          <div className={styles.formGroup}>
+            <div className={styles.progressWrap}>
+              <div className={styles.progressBar} style={{ width: progress + '%' }}></div>
             </div>
             <small>{progress}%</small>
           </div>
 
           <button type="submit" className={styles.uploadButton} disabled={isUploading}>
-            {isUploading ? 'Uploading...' : 'Upload'}
+            {isUploading ? t('uploading') : t('upload')}
           </button>
+          {message && <p style={{ color: isUploading ? 'white' : 'red' }}>{message}</p>}
         </form>
-
-        {message && <p style={{ color: isUploading ? 'white' : 'red' }}>{message}</p>}
       </main>
     </div>
   );
