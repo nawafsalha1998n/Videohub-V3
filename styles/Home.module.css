@@ -1,3 +1,4 @@
+/* كامل ملف Home.module.css (موجود في /styles/Home.module.css) */
 .container {
   padding: 0 2rem;
   background-color: #1a1a1a;
@@ -6,162 +7,150 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
-.main {
-  padding: 4rem 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Header / Navbar */
 .header {
   width: 100%;
-  background: rgba(10,10,10,0.95);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.header a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.header {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 12px 20px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-}
-
-/* logo */
-.logoContainer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logoImage {
-  display: block;
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-/* Upload button */
-.uploadButton {
-  background-color: #ff4500;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.uploadButton:hover {
-  background-color: #e63900;
-}
-
-/* Video grid: 2 columns on mobile, 4 on larger screens */
-.grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 20px 0;
+  padding: 12px 0;
   box-sizing: border-box;
 }
 
-/* Desktop / large screens: 4 columns */
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Card for each video (no visible borders/lines) */
-.card {
-  background: #0f0f0f;
+.logoImage {
+  height: 40px;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .logoImage { height: 56px; }
+}
+
+.rightNav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.langSwitcher {
+  display: flex;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+.langLink {
+  color: #cfcfcf;
+  text-decoration: none;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.langLink:hover { background: rgba(255,255,255,0.04); }
+
+.uploadButton {
+  background: linear-gradient(90deg,#ff7a18,#af002d);
+  color: white;
+  border: none;
+  padding: 8px 12px;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* main area */
+.main {
+  padding: 2rem 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-/* Make the video element responsive */
-.card video,
-.card img {
-  display: block;
+h1 { margin: 16px 0; }
+
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  align-items: start;
+  justify-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 320px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.02);
+  padding: 10px;
+  border-radius: 8px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+
+.thumbWrap { width: 100%; overflow: hidden; border-radius: 8px; }
+
+.thumbnail {
   width: 100%;
   height: auto;
-  background: #000;
+  object-fit: cover;
+  display: block;
 }
 
-/* Title below each video */
-.videoTitle {
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #ffffff;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.videoTitle { margin: 8px 0; font-size: 14px; color: #fff; }
 
-/* Modal (active video) styling - keep it separated and centered */
+/* modal */
 .modal {
   position: fixed;
   inset: 0;
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.6);
-  z-index: 2000;
-  padding: 20px;
+  z-index: 9999;
+  padding: 24px;
   box-sizing: border-box;
 }
 
 .modalContent {
+  width: 100%;
   max-width: 900px;
-  width: 100%;
-  background: #0b0b0b;
-  padding: 18px;
-  border-radius: 10px;
-  color: #fff;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  background: #0f0f0f;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
 }
 
-.closeButton {
+.closeBtn {
   background: transparent;
+  color: #fff;
   border: none;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
   position: absolute;
-  top: 12px;
-  right: 12px;
+  right: 28px;
+  top: 18px;
+  cursor: pointer;
 }
 
-/* Upload form tweaks (keep previous uploadButton class but add spacing) */
-.uploadForm {
-  width: 100%;
-  max-width: 700px;
-  margin: 20px auto;
-  background: transparent;
-  padding: 12px;
-  box-sizing: border-box;
-}
+/* upload form */
+.form { width: 100%; max-width: 700px; margin: 20px auto; background: transparent; padding: 12px; box-sizing: border-box; }
+
+.formGroup { margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+.progressWrap { width: 100%; background: rgba(255,255,255,0.06); height: 8px; border-radius: 6px; overflow: hidden; }
+.progressBar { height: 100%; background: linear-gradient(90deg,#21d4fd,#b721ff); width: 0%; transition: width 0.2s ease; }
 
 /* small utility */
 .center {
