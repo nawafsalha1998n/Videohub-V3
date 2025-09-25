@@ -1,0 +1,13 @@
+{
+  "latestVideos": "أحدث الفيديوهات",
+  "uploadVideo": "تحميل فيديو",
+  "upload": "رفع",
+  "uploading": "جاري الرفع...",
+  "chooseFile": "اختر ملف",
+  "title": "العنوان",
+  "description": "الوصف",
+  "untitled": "بدون عنوان",
+  "uploadSuccess": "تم الرفع بنجاح!",
+  "uploadError": "فشل الرفع.",
+  "logoAlt": "شعار فيديوهاب"
+}
