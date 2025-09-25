@@ -7,13 +7,12 @@ const Header = () => {
     <header className={styles.header}>
       <Link href="/" legacyBehavior>
         <a className={styles.logoContainer}>
-          <Image src="/logo.png" alt="Videohub Logo" width={50} height={50} />
-          <span className={styles.logoText}>Videohub</span>
+          <Image src="/logo.PNG" alt="Videohub Logo" width={64} height={64} className={styles.logoImage} />
         </a>
       </Link>
       <Link href="/upload" legacyBehavior>
         <a className={styles.uploadButton}>
-          Upload Video
+          تحميل فيديو
         </a>
       </Link>
     </header>
